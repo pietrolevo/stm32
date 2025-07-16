@@ -97,7 +97,7 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   uint16_t pwm_value = 0;
-  uint8_t pwm_change = 1;
+  int8_t pwm_change = 1;
   uint32_t now = 0, next_change = 0;
   while (1)
   {
