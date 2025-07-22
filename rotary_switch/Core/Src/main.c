@@ -38,7 +38,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define BUF_LEN 3
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -51,7 +51,7 @@
 /* USER CODE BEGIN PV */
 char msg[30];
 uint16_t rawValue;
-uint16_t adc_buf[1];
+uint16_t adc_buf[16];
 uint8_t position;
 /* USER CODE END PV */
 
@@ -99,7 +99,7 @@ int main(void)
   MX_ADC1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  HAL_ADC_Start_DMA(&hadc1, (uint32_t*) adc_buf, 1);
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*) adc_buf, BUF_LEN);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -107,7 +107,11 @@ int main(void)
   static uint8_t last_pos = 255;
   while (1)
   {
-    rawValue = adc_buf[0];
+    uint32_t sum = 0;
+    for (int i = 0; i < BUF_LEN; i++) {
+      sum += adc_buf[i];
+    }
+    rawValue = sum / BUF_LEN;
     position = 1 + ((rawValue * 9) / 4095);
 
     if (abs(position - last_pos) >=1) {
