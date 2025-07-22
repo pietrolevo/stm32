@@ -38,7 +38,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define BUF_LEN 3
+#define BUF_LEN 32
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -51,7 +51,7 @@
 /* USER CODE BEGIN PV */
 char msg[30];
 uint16_t rawValue;
-uint16_t adc_buf[16];
+uint16_t adc_buf[BUF_LEN];
 uint8_t position;
 /* USER CODE END PV */
 
