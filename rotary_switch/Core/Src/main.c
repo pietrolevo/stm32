@@ -112,7 +112,7 @@ int main(void)
       sum += adc_buf[i];
     }
     rawValue = sum / BUF_LEN;
-    position = 1 + ((rawValue * 9) / 4095);
+    position = (((rawValue * 9) + 2047) / 4095) + 1;
 
     if (abs(position - last_pos) >=1) {
       last_pos = position;
