@@ -18,17 +18,11 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "adc.h"
-#include "dma.h"
-#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <math.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -38,7 +32,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define BUF_LEN 32
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -49,11 +43,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-char msg[30];
-uint16_t rawValue;
-uint16_t oldRV;
-uint16_t adc_buf[BUF_LEN];
-uint8_t position;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -96,34 +86,14 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_DMA_Init();
-  MX_ADC1_Init();
-  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  HAL_ADC_Start_DMA(&hadc1, (uint32_t*) adc_buf, BUF_LEN);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  static uint8_t last_pos = 255;
   while (1)
   {
-    uint32_t sum = 0;
-    for (int i = 0; i < BUF_LEN; i++) {
-      sum += adc_buf[i];
-    }
-    oldRV = rawValue;
-    rawValue = sum / BUF_LEN;
-    position = (((rawValue * 9) + 2047) / 4095) + 1;
-    
-    // if (oldRV != rawValue) to see every value
-    if (abs(position - last_pos) >=1) {
-      last_pos = position;
-      sprintf(msg, "RawValue: %hu\r\n", rawValue);
-      HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-      sprintf(msg, "Position: %hu\r\n", position);
-      HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-    }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
