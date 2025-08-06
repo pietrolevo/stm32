@@ -9,8 +9,13 @@ void LCD_Init(LCD1602_HandleTypeDef* lcd) {
     HAL_Delay(50);
     
     LCD_SendCmd(lcd, LCD_FUNCTION_SET);
+    HAL_Delay(2);
     LCD_SendCmd(lcd, LCD_DISPLAY_ON);
+    HAL_Delay(2);
     LCD_SendCmd(lcd, LCD_CLEAR_DISPLAY);
+    HAL_Delay(5);
+    LCD_SendCmd(lcd, LCD_RETURN_HOME);
+    HAL_Delay(5);
     LCD_SendCmd(lcd, LCD_ENTRY_MODE_SET);
 
     HAL_Delay(2);

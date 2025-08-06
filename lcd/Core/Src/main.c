@@ -97,7 +97,6 @@ int main(void)
     };
 
     LCD_Init(&lcd);
-
     LCD_SetCursor(&lcd, 0, 0);
     LCD_Print(&lcd, "Coco,Che ci date");
     LCD_SetCursor(&lcd, 1, 0);
