@@ -19,9 +19,9 @@
 
 typedef struct {
     GPIO_TypeDef* RS_Port;
-    uint16_t RS_Pin;
+    uint16_t RS_PIN;
     GPIO_TypeDef* E_Port;
-    uint16_t E_Pin;
+    uint16_t E_PIN;
     GPIO_TypeDef* Data_Port[8];
     uint16_t Data_Pin[8];
 } LCD1602_HandleTypeDef;

@@ -22,7 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "lcd1602.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -87,6 +87,21 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
+  LCD1602_HandleTypeDef lcd = {
+        .RS_Port = GPIOC,
+        .RS_PIN = RS_Pin,
+        .E_Port = GPIOC,
+        .E_PIN = E_Pin,
+        .Data_Port = {GPIOA, GPIOA, GPIOA, GPIOA, GPIOA, GPIOA, GPIOA, GPIOA},
+        .Data_Pin = {D0_Pin, D1_Pin, D2_Pin, D3_Pin, D4_Pin, D5_Pin, D6_Pin, D7_Pin}
+    };
+
+    LCD_Init(&lcd);
+
+    LCD_SetCursor(&lcd, 0, 0);
+    LCD_Print(&lcd, "Coco,Che ci date");
+    LCD_SetCursor(&lcd, 1, 0);
+    LCD_Print(&lcd, "la maglia?");
 
   /* USER CODE END 2 */
 
