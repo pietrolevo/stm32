@@ -36,6 +36,6 @@ void LCD_SendData(LCD1602_HandleTypeDef* lcd, uint8_t data);
 void LCD_Printpg(LCD1602_HandleTypeDef* lcd, const char* str);
 void LCD_Println(LCD1602_HandleTypeDef* lcd, uint8_t row, uint8_t col, const char* str);
 void LCD_SetCursor(LCD1602_HandleTypeDef* lcd, uint8_t row, uint8_t col);
-void LCD_Scroll_ln();
+void LCD_Clearln(LCD1602_HandleTypeDef* lcd, uint8_t row);
 
 #endif

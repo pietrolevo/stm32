@@ -114,16 +114,22 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  static uint8_t last_pos = 255; 
+  static uint8_t last_pos = 255;
+  static uint16_t last_raw = 32000;  
   while (1) {
     uint8_t pos = rotaryRead();
     uint16_t raw = rotaryGetRawADC();
 
     if (abs(pos - last_pos) >= 1) {
       last_pos = pos;
-      LCD_Clear(&lcd);
+      LCD_Clearln(&lcd, 0);
       sprintf(msg, "Position: %hu", pos);
       LCD_Println(&lcd, 0, 0, msg);
+    }
+
+    if (abs(raw - last_raw) >= 1) {
+      last_raw = raw;
+      LCD_Clearln(&lcd, 1);
       sprintf(msg, "RawValue: %hu", raw);
       LCD_Println(&lcd, 1, 0, msg);
     }

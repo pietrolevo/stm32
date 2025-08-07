@@ -29,6 +29,18 @@ void LCD_Clear(LCD1602_HandleTypeDef* lcd) {
 }
 
 
+void LCD_Clearln(LCD1602_HandleTypeDef* lcd, uint8_t row) {
+    if (row > 1) return;
+
+    LCD_SetCursor(lcd, row, 0);
+    for (uint8_t i = 0; i < 16; i++) {
+        LCD_SendData(lcd, ' ');
+    }
+
+    LCD_SetCursor(lcd, row, 0);
+}
+
+
 void LCD_SendCmd(LCD1602_HandleTypeDef* lcd, uint8_t cmd) {
     HAL_GPIO_WritePin(lcd->RS_Port, lcd->RS_PIN, GPIO_PIN_RESET);
 
