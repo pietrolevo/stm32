@@ -56,10 +56,25 @@ void LCD_SendData(LCD1602_HandleTypeDef* lcd, uint8_t data) {
 }
 
 
-void LCD_Print(LCD1602_HandleTypeDef* lcd, const char* str) {
+void LCD_Printpg(LCD1602_HandleTypeDef* lcd, const char* str) {
+    uint8_t row = 0;
+    uint8_t col = 0;
+
+    LCD_SetCursor(lcd, row, col);
+
     while (*str) {
         LCD_SendData(lcd, (uint8_t)(*str));
         str++;
+        col++;
+
+        if (col >= 16) {
+            row++;
+            if (row >= 2) {
+                break;
+            }
+            col = 0;
+            LCD_SetCursor(lcd, row, col);
+        }
     }
 }
 
