@@ -8,6 +8,8 @@
 
 #include "stm32f4xx_hal.h"
 
+#define ROW 2
+#define COL 16
 
 #define LCD_CLEAR_DISPLAY        0x01 
 #define LCD_RETURN_HOME          0x02  
@@ -32,7 +34,8 @@ void LCD_Clear(LCD1602_HandleTypeDef* lcd);
 void LCD_SendCmd(LCD1602_HandleTypeDef* lcd, uint8_t cmd);
 void LCD_SendData(LCD1602_HandleTypeDef* lcd, uint8_t data);
 void LCD_Printpg(LCD1602_HandleTypeDef* lcd, const char* str);
-void LCD_Println(LCD1602_HandleTypeDef* lcd, uint8_t row, const char* str);
+void LCD_Println(LCD1602_HandleTypeDef* lcd, uint8_t row, uint8_t col, const char* str);
 void LCD_SetCursor(LCD1602_HandleTypeDef* lcd, uint8_t row, uint8_t col);
+void LCD_Scroll_ln();
 
 #endif

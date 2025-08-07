@@ -98,10 +98,7 @@ int main(void)
 
     LCD_Init(&lcd);
     LCD_Clear(&lcd);
-    LCD_Printpg(&lcd, "ABCDEFGHILMNOPQRSTUVZ123456789");
-    
-    //LCD_SetCursor(&lcd, 1, 0);
-    //LCD_Print(&lcd, "la maglia?");
+    //LCD_Printpg(&lcd, "ABCDEFGHILMNOPQRSTUVZ123456789");
 
   /* USER CODE END 2 */
 
@@ -109,6 +106,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    LCD_Println(&lcd, 0, 0, "ABCDEFGHILMNOPQRSTUVZ123456789");
+    LCD_Println(&lcd, 1, 2, "ciao riga 2");
+    HAL_Delay(300);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

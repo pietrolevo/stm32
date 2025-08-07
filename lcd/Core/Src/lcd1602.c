@@ -4,6 +4,7 @@
 */
 
 #include "lcd1602.h"
+#include "string.h"
 
 void LCD_Init(LCD1602_HandleTypeDef* lcd) {
     HAL_Delay(50);
@@ -75,6 +76,41 @@ void LCD_Printpg(LCD1602_HandleTypeDef* lcd, const char* str) {
             col = 0;
             LCD_SetCursor(lcd, row, col);
         }
+    }
+}
+
+
+void LCD_Println(LCD1602_HandleTypeDef* lcd, uint8_t row, uint8_t col, const char* str) {
+    static size_t offset0 = 0;
+    static size_t offset1 = 0;
+    size_t len = strlen(str);
+
+    size_t *offset;
+    if (row == 0) {
+        offset = &offset0;
+    } else {
+        offset = &offset1;
+    }
+
+    LCD_SetCursor(lcd, row, col);
+    if (len <= COL - col) {
+        for (uint8_t i = 0; i < len; i++) {
+            LCD_SendData(lcd, (uint8_t)str[i]);
+        }
+
+    } else {
+        for (uint8_t i = 0; i < (COL - col); i++) {
+            size_t index = *offset + i;
+            if (index >= len) {
+                index -= len;
+            }
+            LCD_SendData(lcd, (uint8_t)str[index]);
+        }
+
+        (*offset)++;
+        if (*offset >= len) {
+            *offset = 0;
+        } 
     }
 }
 
