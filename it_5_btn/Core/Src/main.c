@@ -23,17 +23,21 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "string.h"
+#include "stdio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+typedef struct {
+  uint16_t GPIO_Pin;
+  uint8_t state;
+} btn_info;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define N_BTN 5
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -44,7 +48,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+btn_info list[N_BTN];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -55,7 +59,58 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void BTN_init(void) {
+  list[0].GPIO_Pin = BTN1_Pin;
+  list[1].GPIO_Pin = BTN2_Pin;
+  list[2].GPIO_Pin = BTN3_Pin;
+  list[3].GPIO_Pin = BTN4_Pin;
+  list[4].GPIO_Pin = BTN5_Pin;
 
+  for (uint8_t i = 0; i < N_BTN; i++) {
+    list[i].state = 0;
+  }
+}
+
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+  switch(GPIO_Pin) {
+    case BTN1_Pin:
+      if (list[0].state != 0) {
+        list[0].state = 0;
+      } else {
+        list[0].state = 1;
+      }
+    break;
+    case BTN2_Pin:
+      if (list[1].state != 0) {
+        list[1].state = 0;
+      } else {
+        list[1].state = 1;
+      }
+    break;
+    case BTN3_Pin:
+          if (list[2].state != 0) {
+        list[2].state = 0;
+      } else {
+        list[2].state = 1;
+      }
+      break;
+    case BTN4_Pin:
+          if (list[3].state != 0) {
+        list[3].state = 0;
+      } else {
+        list[3].state = 1;
+      }  
+    break;
+    case BTN5_Pin:
+          if (list[4].state != 0) {
+        list[4].state = 0;
+      } else {
+        list[4].state = 1;
+      }  
+    break;
+  }
+}
 /* USER CODE END 0 */
 
 /**
@@ -89,13 +144,16 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  BTN_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  char msg[32];
   while (1)
   {
+    sprintf(msg, "states: %hu %hu %hu %hu %hu\r\n", list[0].state, list[1].state, list[2].state, list[3].state, list[4].state);
+    HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
