@@ -1,6 +1,9 @@
 /*
     file: rotary.h
     author: pietro levo
+
+    info:
+    VDD:    3.3V
 */
 
 #ifndef __ROTARY_H__

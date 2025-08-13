@@ -109,6 +109,13 @@ int main(void)
 
   LCD_Init(&lcd);
   LCD_Clear(&lcd);
+  
+  LCD_SetCursor(&lcd, 0, 0);
+  LCD_Println(&lcd, 0, 0, "Position:");
+
+  LCD_SetCursor(&lcd, 1, 0);
+  LCD_Println(&lcd, 1, 0, "RawValue:");
+
 
   /* USER CODE END 2 */
 
@@ -122,16 +129,14 @@ int main(void)
 
     if (abs(pos - last_pos) >= 1) {
       last_pos = pos;
-      LCD_Clearln(&lcd, 0);
-      sprintf(msg, "Position: %hu", pos);
-      LCD_Println(&lcd, 0, 0, msg);
+      sprintf(msg, "%-5hu", pos);
+      LCD_Println(&lcd, 0, 10, msg);
     }
 
     if (abs(raw - last_raw) >= 1) {
       last_raw = raw;
-      LCD_Clearln(&lcd, 1);
-      sprintf(msg, "RawValue: %hu", raw);
-      LCD_Println(&lcd, 1, 0, msg);
+      sprintf(msg, "%-5hu", raw);
+      LCD_Println(&lcd, 1, 10, msg);
     }
     HAL_Delay(300);
     /* USER CODE END WHILE */

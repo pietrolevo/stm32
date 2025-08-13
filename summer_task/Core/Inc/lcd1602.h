@@ -1,6 +1,13 @@
 /* 
     file: lcd1602.h
     author: pietro levo
+
+    info:
+    VDD:    5V
+    V0:     resistor--GND
+    RW:     GND
+    A:      resistor--GND
+    K:      GND
 */
 
 #ifndef __LCD1602_H__
@@ -31,11 +38,11 @@ typedef struct {
 
 void LCD_Init(LCD1602_HandleTypeDef* lcd);
 void LCD_Clear(LCD1602_HandleTypeDef* lcd);
+void LCD_Clearln(LCD1602_HandleTypeDef* lcd, uint8_t row);
 void LCD_SendCmd(LCD1602_HandleTypeDef* lcd, uint8_t cmd);
 void LCD_SendData(LCD1602_HandleTypeDef* lcd, uint8_t data);
 void LCD_Printpg(LCD1602_HandleTypeDef* lcd, const char* str);
 void LCD_Println(LCD1602_HandleTypeDef* lcd, uint8_t row, uint8_t col, const char* str);
 void LCD_SetCursor(LCD1602_HandleTypeDef* lcd, uint8_t row, uint8_t col);
-void LCD_Clearln(LCD1602_HandleTypeDef* lcd, uint8_t row);
 
 #endif
