@@ -93,19 +93,20 @@ int main(void)
   MX_TIM1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  RE_init();
+  RE_struct enc1;
+  RE_init(&enc1, &htim1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  char msg[32] = {'\0'};
+  char msg[64] = {'\0'};
   while (1)
   {
-    uint16_t raw = RE_getRawCount();
-    uint8_t pos = RE_getPos();
-    int8_t dir = RE_getDirection;
+    uint16_t raw = RE_getRawCount(&enc1);
+    uint8_t pos = RE_getPos(&enc1);
+    int8_t dir = RE_getDirection(&enc1);
 
-    sprintf(msg, "count: %hu pos: %hu dir:%d\r\n", raw, pos, dir);
+    sprintf(msg, "cnt: %hu pos: %hu dir:%d\r\n", raw, pos, dir);
     HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
     HAL_Delay(100);
     /* USER CODE END WHILE */

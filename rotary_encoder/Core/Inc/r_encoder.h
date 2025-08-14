@@ -8,10 +8,19 @@
 
 #include "stm32f4xx_hal.h"
 
-void RE_init(void);
-uint16_t RE_getRawCount(void);
-uint8_t RE_getPos(void);
-int8_t RE_getDirection(void);
+#define MIN_P 1
+#define MAX_P 10
+#define TICKS_PER_STEP 8
+
+typedef struct {
+    TIM_HandleTypeDef *htim;
+    uint16_t base_count;
+} RE_struct;
+
+void RE_init(RE_struct *encoder, TIM_HandleTypeDef *htim);
+uint16_t RE_getRawCount(RE_struct *encoder);
+uint8_t RE_getPos(RE_struct *encoder);
+int8_t RE_getDirection(RE_struct *encoder);
 
 
 #endif
