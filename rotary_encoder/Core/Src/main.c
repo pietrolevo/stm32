@@ -101,9 +101,13 @@ int main(void)
   char msg[32] = {'\0'};
   while (1)
   {
+    uint16_t raw = RE_getRawCount();
     uint8_t pos = RE_getPos();
-    sprintf(msg, "position: %hu\r\n", pos);
+    int8_t dir = RE_getDirection;
+
+    sprintf(msg, "count: %hu pos: %hu dir:%d\r\n", raw, pos, dir);
     HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+    HAL_Delay(100);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
