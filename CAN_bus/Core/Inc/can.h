@@ -41,6 +41,15 @@ extern CAN_HandleTypeDef hcan1;
 void MX_CAN1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
+// callback signature
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *);
+void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *);
+void HAL_CAN_RxFifo0FullCallback(CAN_HandleTypeDef *);
+void HAL_CAN_RxFifo1FullCallback(CAN_HandleTypeDef *);
+void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *);
+void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef *);
+void HAL_CAN_TxMailbox2CompleteCallback(CAN_HandleTypeDef *);
+void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *);
 
 /* USER CODE END Prototypes */
 

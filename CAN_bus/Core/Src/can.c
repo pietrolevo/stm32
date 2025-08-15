@@ -39,7 +39,7 @@ void MX_CAN1_Init(void)
   /* USER CODE END CAN1_Init 1 */
   hcan1.Instance = CAN1;
   hcan1.Init.Prescaler = 3;
-  hcan1.Init.Mode = CAN_MODE_NORMAL;
+  hcan1.Init.Mode = CAN_MODE_LOOPBACK;
   hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan1.Init.TimeSeg1 = CAN_BS1_12TQ;
   hcan1.Init.TimeSeg2 = CAN_BS2_2TQ;
@@ -54,6 +54,18 @@ void MX_CAN1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN CAN1_Init 2 */
+  if (HAL_CAN_Start(&hcan1) != HAL_OK) {
+    Error_Handler();
+  }
+
+  if (HAL_CAN_ActivateNotification(&hcan1,
+    CAN_IT_ERROR_WARNING |
+    CAN_IT_ERROR_PASSIVE |
+    CAN_IT_BUSOFF |
+    CAN_IT_LAST_ERROR_CODE |
+    CAN_IT_ERROR) != HAL_OK) {
+      Error_Handler();
+  }
 
   /* USER CODE END CAN1_Init 2 */
 
@@ -127,5 +139,28 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 }
 
 /* USER CODE BEGIN 1 */
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *) {
 
+}
+void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *) {
+
+}
+void HAL_CAN_RxFifo0FullCallback(CAN_HandleTypeDef *) {
+
+}
+void HAL_CAN_RxFifo1FullCallback(CAN_HandleTypeDef *) {
+
+}
+void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *) {
+
+}
+void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef *) {
+
+}
+void HAL_CAN_TxMailbox2CompleteCallback(CAN_HandleTypeDef *) {
+
+} 
+void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *) {
+  
+}
 /* USER CODE END 1 */
