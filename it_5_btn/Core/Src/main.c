@@ -29,15 +29,13 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-typedef struct {
-  uint16_t GPIO_Pin;
-  uint8_t state;
-} btn_info;
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define N_BTN 5
+#define DEBOUNCE_DELAY 100
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -48,7 +46,9 @@ typedef struct {
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-btn_info list[N_BTN];
+uint8_t btn_state[N_BTN] = {0};
+uint8_t btn_old_state[N_BTN] = {0};
+uint32_t last_press_time[N_BTN] = {0};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -59,55 +59,36 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void BTN_init(void) {
-  list[0].GPIO_Pin = BTN1_Pin;
-  list[1].GPIO_Pin = BTN2_Pin;
-  list[2].GPIO_Pin = BTN3_Pin;
-  list[3].GPIO_Pin = BTN4_Pin;
-  list[4].GPIO_Pin = BTN5_Pin;
 
-  for (uint8_t i = 0; i < N_BTN; i++) {
-    list[i].state = 0;
+void handle_press(GPIO_TypeDef *gpiox, uint16_t GPIO_pin, uint8_t num) {
+  GPIO_PinState pin_state = HAL_GPIO_ReadPin(gpiox, GPIO_pin);
+  uint32_t now = uwTick;
+
+  if (pin_state == GPIO_PIN_RESET && (now - last_press_time[num]) > DEBOUNCE_DELAY) {
+    btn_state[num] ^= 1;
+    last_press_time[num] = now;
   }
 }
 
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-  switch(GPIO_Pin) {
-    case BTN1_Pin:
-      if (list[0].state != 0) {
-        list[0].state = 0;
-      } else {
-        list[0].state = 1;
-      }
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_pin) {
+  switch (GPIO_pin) {
+  case BTN1_Pin:
+    handle_press(BTN1_GPIO_Port, BTN1_Pin, 0);
     break;
-    case BTN2_Pin:
-      if (list[1].state != 0) {
-        list[1].state = 0;
-      } else {
-        list[1].state = 1;
-      }
+  case BTN2_Pin:
+    handle_press(BTN2_GPIO_Port, BTN2_Pin, 1);
     break;
-    case BTN3_Pin:
-          if (list[2].state != 0) {
-        list[2].state = 0;
-      } else {
-        list[2].state = 1;
-      }
-      break;
-    case BTN4_Pin:
-          if (list[3].state != 0) {
-        list[3].state = 0;
-      } else {
-        list[3].state = 1;
-      }  
+  case BTN3_Pin:
+    handle_press(BTN3_GPIO_Port, BTN3_Pin, 2);
     break;
-    case BTN5_Pin:
-          if (list[4].state != 0) {
-        list[4].state = 0;
-      } else {
-        list[4].state = 1;
-      }  
+  case BTN4_Pin:
+    handle_press(BTN4_GPIO_Port, BTN4_Pin, 3);
+    break; 
+  case BTN5_Pin:
+    handle_press(BTN5_GPIO_Port, BTN5_Pin, 4);
+    break;
+  default:
     break;
   }
 }
@@ -144,16 +125,23 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  BTN_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   char msg[32];
-  while (1)
-  {
-    sprintf(msg, "states: %hu %hu %hu %hu %hu\r\n", list[0].state, list[1].state, list[2].state, list[3].state, list[4].state);
-    HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+  uint32_t last_time = 0;
+  const uint32_t interval = 500;
+  while (1) {
+    uint32_t now = uwTick;
+
+    if (now - last_time >= interval) {
+      last_time = now; 
+
+      sprintf(msg, "states: %d %d %d %d %d\r\n", 
+      btn_state[0], btn_state[1], btn_state[2], btn_state[3], btn_state[4]);
+      HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY); 
+    }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
