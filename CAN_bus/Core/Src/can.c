@@ -54,11 +54,31 @@ void MX_CAN1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN CAN1_Init 2 */
+
+  CAN_FilterTypeDef filter;
+  filter.FilterActivation = ENABLE;
+  filter.FilterBank = 0;
+  filter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+  filter.FilterIdHigh = 0x0000;
+  filter.FilterIdLow = 0x0000;
+  filter.FilterMaskIdHigh = 0x0000;
+  filter.FilterMaskIdLow = 0x0000;
+  filter.FilterMode = CAN_FILTERMODE_IDMASK;
+  filter.FilterScale = CAN_FILTERSCALE_32BIT;
+
+  HAL_StatusTypeDef filter_status = HAL_CAN_ConfigFilter(&hcan1, &filter);
+  
+  if (filter_status != HAL_OK) {
+      Error_Handler();
+  } 
+
+
   if (HAL_CAN_Start(&hcan1) != HAL_OK) {
     Error_Handler();
   }
 
   if (HAL_CAN_ActivateNotification(&hcan1,
+    CAN_IT_RX_FIFO0_MSG_PENDING |
     CAN_IT_ERROR_WARNING |
     CAN_IT_ERROR_PASSIVE |
     CAN_IT_BUSOFF |
@@ -139,95 +159,5 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 }
 
 /* USER CODE BEGIN 1 */
-void CAN_ErrorHandler(CAN_HandleTypeDef *hcan) {
-    char buf[20];
-    uint32_t error = HAL_CAN_GetError(hcan);
 
-    #define tmp_printf(X)                                           \
-    do {                                                                   \
-        HAL_UART_Transmit(&huart1, (uint8_t *)(X), strlen(X), HAL_MAX_DELAY); \
-        HAL_UART_Transmit(&huart1, (uint8_t *)("\r\n"), strlen("\r\n"), HAL_MAX_DELAY); \
-    } while (0)
- 
-    if (error & HAL_CAN_ERROR_EWG)
-        tmp_printf("Protocol Error Warning");
-    if (error & HAL_CAN_ERROR_EPV)
-        tmp_printf("Error Passive");
-    if (error & HAL_CAN_ERROR_BOF)
-        tmp_printf("Bus-off Error");
-    if (error & HAL_CAN_ERROR_STF)
-        tmp_printf("Stuff Error");
-    if (error & HAL_CAN_ERROR_FOR)
-        tmp_printf("Form Error");
-    if (error & HAL_CAN_ERROR_ACK)
-        tmp_printf("ACK Error");
-    if (error & HAL_CAN_ERROR_BR)
-        tmp_printf("Bit Recessive Error");
-    if (error & HAL_CAN_ERROR_BD)
-        tmp_printf("Bit Dominant Error");
-    if (error & HAL_CAN_ERROR_CRC)
-        tmp_printf("CRC Error");
-    if (error & HAL_CAN_ERROR_RX_FOV0)
-        tmp_printf("FIFO0 Overrun");
-    if (error & HAL_CAN_ERROR_RX_FOV1)
-        tmp_printf("FIFO1 Overrun");
-    if (error & HAL_CAN_ERROR_TX_ALST0)
-        tmp_printf("Mailbox 0 TX failure (arbitration lost)");
-    if (error & HAL_CAN_ERROR_TX_TERR0)
-        tmp_printf("Mailbox 0 TX failure (tx error)");
-    if (error & HAL_CAN_ERROR_TX_ALST1)
-        tmp_printf("Mailbox 1 TX failure (arbitration lost)");
-    if (error & HAL_CAN_ERROR_TX_TERR1)
-        tmp_printf("Mailbox 1 TX failure (tx error)");
-    if (error & HAL_CAN_ERROR_TX_ALST2)
-        tmp_printf("Mailbox 2 TX failure (arbitration lost)");
-    if (error & HAL_CAN_ERROR_TX_TERR2)
-        tmp_printf("Mailbox 2 TX failure (tx error)");
-    if (error & HAL_CAN_ERROR_TIMEOUT)
-        tmp_printf("Timeout Error");
-    if (error & HAL_CAN_ERROR_NOT_INITIALIZED)
-        tmp_printf("Peripheral not initialized");
-    if (error & HAL_CAN_ERROR_NOT_READY)
-        tmp_printf("Peripheral not ready");
-    if (error & HAL_CAN_ERROR_NOT_STARTED)
-        tmp_printf("Peripheral not strated");
-    if (error & HAL_CAN_ERROR_PARAM)
-        tmp_printf("Parameter Error");
-     
-    uint16_t rec = (uint16_t)((hcan->Instance->ESR && CAN_ESR_REC_Msk) >> CAN_ESR_REC_Pos);
-    uint16_t tec = (uint16_t)((hcan->Instance->ESR && CAN_ESR_TEC_Msk) >> CAN_ESR_TEC_Pos);
-
-    sprintf(buf,"rec %u, tec %u",rec,tec);
-    tmp_printf(buf);
-
-    HAL_CAN_ResetError(hcan);
-}
-
-
-void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
-
-}
-void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan) {
-
-}
-void HAL_CAN_RxFifo0FullCallback(CAN_HandleTypeDef *hcan) {
-
-}
-void HAL_CAN_RxFifo1FullCallback(CAN_HandleTypeDef *hcan) {
-
-}
-void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *hcan) {
-
-}
-void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef *hcan) {
-
-}
-void HAL_CAN_TxMailbox2CompleteCallback(CAN_HandleTypeDef *hcan) {
-
-} 
-void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan) {
-  if(hcan == &hcan1){
-    CAN_ErrorHandler(hcan);
-  }
-}
 /* USER CODE END 1 */

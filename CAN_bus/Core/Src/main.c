@@ -24,7 +24,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "can_func.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

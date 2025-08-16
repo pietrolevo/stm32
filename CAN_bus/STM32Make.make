@@ -76,6 +76,7 @@ endif
 # C sources
 C_SOURCES =  \
 Core/Src/can.c \
+Core/Src/can_func.c \
 Core/Src/gpio.c \
 Core/Src/main.c \
 Core/Src/stm32f4xx_hal_msp.c \
