@@ -49,13 +49,17 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
-  /*Configure GPIO pins : C1_Pin C2_Pin C4_Pin C8_Pin
-                           CC_Pin */
-  GPIO_InitStruct.Pin = C1_Pin|C2_Pin|C4_Pin|C8_Pin
-                          |CC_Pin;
+  /*Configure GPIO pins : C1_Pin C2_Pin C4_Pin C8_Pin */
+  GPIO_InitStruct.Pin = C1_Pin|C2_Pin|C4_Pin|C8_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : CC_Pin */
+  GPIO_InitStruct.Pin = CC_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  HAL_GPIO_Init(CC_GPIO_Port, &GPIO_InitStruct);
 
 }
 
