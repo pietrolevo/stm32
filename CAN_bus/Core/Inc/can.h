@@ -35,13 +35,19 @@ extern "C" {
 extern CAN_HandleTypeDef hcan1;
 
 /* USER CODE BEGIN Private defines */
+extern CAN_TxHeaderTypeDef TxHeader;
+extern uint8_t TxData[8];
+extern uint32_t TxMailbox;
 
+extern CAN_RxHeaderTypeDef RxHeader;
+extern uint8_t RxData[8];
+extern uint8_t data_avlble;
 /* USER CODE END Private defines */
 
 void MX_CAN1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+HAL_StatusTypeDef CAN_send(CAN_HandleTypeDef *hcan, uint8_t *buffer, CAN_TxHeaderTypeDef *header);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
