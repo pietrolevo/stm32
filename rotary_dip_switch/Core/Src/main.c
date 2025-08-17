@@ -18,16 +18,22 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+typedef struct {
+  GPIO_TypeDef *gpiox[5];
+  uint16_t pin[5];
+  uint8_t position;
+} RDS_t;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -54,7 +60,16 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+uint8_t RDS_read(RDS_t *rds) {
+  rds->position = 0;
+  if (HAL_GPIO_ReadPin(rds->gpiox[0], rds->pin[0]) == GPIO_PIN_SET) {
+    rds->position |= (HAL_GPIO_ReadPin(rds->gpiox[1], rds->pin[1]) == GPIO_PIN_SET ? 1 : 0) << 0;
+    rds->position |= (HAL_GPIO_ReadPin(rds->gpiox[2], rds->pin[2]) == GPIO_PIN_SET ? 1 : 0) << 1;
+    rds->position |= (HAL_GPIO_ReadPin(rds->gpiox[3], rds->pin[3]) == GPIO_PIN_SET ? 1 : 0) << 2;
+    rds->position |= (HAL_GPIO_ReadPin(rds->gpiox[4], rds->pin[4]) == GPIO_PIN_SET ? 1 : 0) << 3;
+  }
+  return rds->position;
+} 
 /* USER CODE END 0 */
 
 /**
@@ -86,14 +101,32 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  RDS_t rds1 = {
+    .gpiox = {CC_GPIO_Port, C1_GPIO_Port, C2_GPIO_Port, C4_GPIO_Port, C8_GPIO_Port},
+    .pin = {CC_Pin, C1_Pin, C2_Pin, C4_Pin, C8_Pin},
+    .position = 0
+  };
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  char msg[32];
+  uint32_t past = 0;
+  const uint32_t interval = 500;
+
   while (1)
   {
+    uint32_t now = uwTick;
+    uint8_t rds1_pos = RDS_read(&rds1);
+
+    if ((now - past) >= interval) {
+      past = now;
+      sprintf(msg, "position: %hu\r\n", rds1_pos);
+      HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY); 
+    }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
