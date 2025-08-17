@@ -47,7 +47,7 @@
 
 /* USER CODE BEGIN PV */
 uint8_t btn_state[N_BTN] = {0};
-uint8_t btn_old_state[N_BTN] = {0};
+//uint8_t btn_old_state[N_BTN] = {0};
 uint32_t last_press_time[N_BTN] = {0};
 /* USER CODE END PV */
 
