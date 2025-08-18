@@ -30,6 +30,8 @@ uint32_t TxMailbox;
 CAN_RxHeaderTypeDef RxHeader;
 uint8_t RxData[8];
 uint8_t data_avlble;
+
+uint32_t msg_cnt = 0;
 /* USER CODE END 0 */
 
 CAN_HandleTypeDef hcan1;
@@ -73,19 +75,13 @@ void MX_CAN1_Init(void)
   filter.FilterMaskIdLow = 0x0000;
   filter.FilterMode = CAN_FILTERMODE_IDMASK;
   filter.FilterScale = CAN_FILTERSCALE_32BIT;
+  filter.SlaveStartFilterBank = 14;
 
-  HAL_StatusTypeDef filter_status = HAL_CAN_ConfigFilter(&hcan1, &filter);
-  
-  if (filter_status != HAL_OK) {
-      Error_Handler();
-  } 
+    if (HAL_CAN_ConfigFilter(&hcan1, &filter) != HAL_OK) {
+        Error_Handler();
+    }
 
-
-  if (HAL_CAN_Start(&hcan1) != HAL_OK) {
-    Error_Handler();
-  }
-
-  if (HAL_CAN_ActivateNotification(&hcan1,
+    if (HAL_CAN_ActivateNotification(&hcan1,
     CAN_IT_RX_FIFO0_MSG_PENDING |
     CAN_IT_ERROR_WARNING |
     CAN_IT_ERROR_PASSIVE |
@@ -93,6 +89,11 @@ void MX_CAN1_Init(void)
     CAN_IT_LAST_ERROR_CODE |
     CAN_IT_ERROR) != HAL_OK) {
       Error_Handler();
+  }
+  
+
+  if (HAL_CAN_Start(&hcan1) != HAL_OK) {
+    Error_Handler();
   }
 
   /* USER CODE END CAN1_Init 2 */
@@ -116,7 +117,14 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
     PA11     ------> CAN1_RX
     PA12     ------> CAN1_TX
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_11|GPIO_PIN_12;
+    GPIO_InitStruct.Pin = GPIO_PIN_11;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF9_CAN1;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = GPIO_PIN_12;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
@@ -173,8 +181,8 @@ void CAN_ErrorHandler(CAN_HandleTypeDef *hcan) {
 
     #define tmp_printf(X)                                           \
     do {                                                                   \
-        HAL_UART_Transmit(&huart1, (uint8_t *)(X), strlen(X), HAL_MAX_DELAY); \
-        HAL_UART_Transmit(&huart1, (uint8_t *)("\r\n"), strlen("\r\n"), HAL_MAX_DELAY); \
+        HAL_UART_Transmit(&huart2, (uint8_t *)(X), strlen(X), HAL_MAX_DELAY); \
+        HAL_UART_Transmit(&huart2, (uint8_t *)("\r\n"), strlen("\r\n"), HAL_MAX_DELAY); \
     } while (0)
  
     if (error & HAL_CAN_ERROR_EWG)
@@ -233,12 +241,33 @@ void CAN_ErrorHandler(CAN_HandleTypeDef *hcan) {
 
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
+    HAL_UART_Transmit(&huart2, (uint8_t*)"CALLBACK RX\r\n", 13, 100);
     if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK) {
         Error_Handler();
     }
     data_avlble = 1;
+
+    // Stampa dettagli del messaggio ricevuto
+    char buf[100];
+    int len = snprintf(buf, sizeof(buf),
+        "CAN RX #%lu ID=0x%03lX DLC=%lu Data=%02X %02X %02X %02X %02X %02X %02X %02X\r\n",
+        (unsigned long)(++msg_cnt),
+        (unsigned long)RxHeader.StdId,
+        (unsigned long)RxHeader.DLC,
+        RxData[0], RxData[1], RxData[2], RxData[3],
+        RxData[4], RxData[5], RxData[6], RxData[7]
+    );
+
+    // Invia la riga intera via UART
+    HAL_UART_Transmit(&huart2, (uint8_t*)buf, len, 10);
 }
 
+/*void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan) {}                                       
+void HAL_CAN_RxFifo0FullCallback(CAN_HandleTypeDef *hcan) {}                                                       
+void HAL_CAN_RxFifo1FullCallback(CAN_HandleTypeDef *hcan){}                                                        
+void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *hcan){}                                         
+void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef *hcan) {}                                       
+void HAL_CAN_TxMailbox2CompleteCallback(CAN_HandleTypeDef *hcan) {}*/                                   
 
 void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan) {
   if(hcan == &hcan1){

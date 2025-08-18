@@ -89,15 +89,55 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_CAN1_Init();
-  MX_USART1_UART_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  uint32_t now = 0, next_tx_temp = 5000, next_tx_speed = 10000;
   while (1)
   {
+    now = uwTick;
+    /*if ((now - past) >= interval) {
+      
+    }*/
+
+    if (now >= next_tx_temp) {
+      uint16_t temperatura_motore = 85; // 85°C
+      TxHeader.DLC = 2;
+      TxHeader.IDE = CAN_ID_STD;
+      TxHeader.RTR = CAN_RTR_DATA;
+      TxHeader.StdId = 0x100; // ID temperatura motore
+
+      TxData[0] = (temperatura_motore >> 8) & 0xFF;
+      TxData[1] = temperatura_motore & 0xFF;
+
+      if (CAN_send(&hcan1, TxData, &TxHeader) != HAL_OK) {
+        Error_Handler();
+      }
+
+       next_tx_temp = now + 5000;
+
+    }
+
+    if (now >= next_tx_speed) {
+      uint16_t velocita_veicolo = 123; // 123 km/h
+
+      TxHeader.DLC = 2;
+      TxHeader.IDE = CAN_ID_STD;
+      TxHeader.RTR = CAN_RTR_DATA;        
+      TxHeader.StdId = 0x200; // ID velocità veicolo
+      TxData[0] = (velocita_veicolo >> 8) & 0xFF;
+      TxData[1] = velocita_veicolo & 0xFF;
+
+      if (CAN_send(&hcan1, TxData, &TxHeader) != HAL_OK) {
+        Error_Handler();
+      }
+
+      next_tx_speed = now + 10000;
+    }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -122,11 +162,12 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 4;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+  RCC_OscInitStruct.PLL.PLLM = 8;
   RCC_OscInitStruct.PLL.PLLN = 180;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 2;
