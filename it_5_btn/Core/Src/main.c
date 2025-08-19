@@ -47,7 +47,6 @@
 
 /* USER CODE BEGIN PV */
 uint8_t btn_state[N_BTN] = {0};
-//uint8_t btn_old_state[N_BTN] = {0};
 uint32_t last_press_time[N_BTN] = {0};
 /* USER CODE END PV */
 
@@ -67,11 +66,18 @@ void handle_press(GPIO_TypeDef *gpiox, uint16_t GPIO_pin, uint8_t num) {
   if (pin_state == GPIO_PIN_RESET && (now - last_press_time[num]) > DEBOUNCE_DELAY) {
     btn_state[num] ^= 1;
     last_press_time[num] = now;
+  
+  char debug[32];
+  sprintf(debug, "BTN %hu pressed\r\n", (num+1));
+  HAL_UART_Transmit(&huart1, (uint8_t*)debug, strlen(debug), HAL_MAX_DELAY);
   }
 }
 
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_pin) {
+  char debug[32];
+  sprintf(debug, "CALLBACK\r\n");
+  HAL_UART_Transmit(&huart1, (uint8_t*)debug, strlen(debug), HAL_MAX_DELAY);
   switch (GPIO_pin) {
   case BTN1_Pin:
     handle_press(BTN1_GPIO_Port, BTN1_Pin, 0);
@@ -123,7 +129,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_USART2_UART_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   /* USER CODE END 2 */
 
@@ -140,7 +146,7 @@ int main(void)
 
       sprintf(msg, "states: %d %d %d %d %d\r\n", 
       btn_state[0], btn_state[1], btn_state[2], btn_state[3], btn_state[4]);
-      HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY); 
+      HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY); 
     }
     /* USER CODE END WHILE */
 
