@@ -7,6 +7,11 @@
 #include "string.h"
 
 void LCD_Init(LCD1602_HandleTypeDef* lcd) {
+    if (lcd->mode == LCD_MODE_4BIT) {
+        LCD_Init_4bit(lcd);
+        return;
+    }
+
     HAL_Delay(50);
     
     LCD_SendCmd(lcd, LCD_FUNCTION_SET);
@@ -42,6 +47,11 @@ void LCD_Clearln(LCD1602_HandleTypeDef* lcd, uint8_t row) {
 
 
 void LCD_SendCmd(LCD1602_HandleTypeDef* lcd, uint8_t cmd) {
+    if (lcd->mode == LCD_MODE_4BIT) {
+        LCD_SendCmd_4bit(lcd, cmd);
+        return;
+    }
+
     HAL_GPIO_WritePin(lcd->RS_Port, lcd->RS_PIN, GPIO_PIN_RESET);
 
     for (int i = 0; i < 8; i++) {
@@ -56,6 +66,11 @@ void LCD_SendCmd(LCD1602_HandleTypeDef* lcd, uint8_t cmd) {
 
 
 void LCD_SendData(LCD1602_HandleTypeDef* lcd, uint8_t data) {
+    if (lcd->mode == LCD_MODE_4BIT) {
+        LCD_SendData_4bit(lcd, data);
+        return;
+    }
+
     HAL_GPIO_WritePin(lcd->RS_Port, lcd->RS_PIN, GPIO_PIN_SET);
 
     for (int i = 0; i < 8; i++) {
@@ -132,3 +147,49 @@ void LCD_SetCursor(LCD1602_HandleTypeDef* lcd, uint8_t row, uint8_t col) {
     LCD_SendCmd(lcd, LCD_SET_DDRAM_ADDR | address);
 }
 
+/* ---------------------------------------4 bit version---------------------------------------------------------------*/
+void LCD_Send4bit(LCD1602_HandleTypeDef* lcd, uint8_t nibble) {
+    for (int i = 0; i < 4; i++) { 
+        HAL_GPIO_WritePin(lcd->Data_Port[i], lcd->Data_Pin[i], (nibble >> i) & 0x01 ? GPIO_PIN_SET : GPIO_PIN_RESET); 
+    } 
+
+    HAL_GPIO_WritePin(lcd->E_Port, lcd->E_PIN, GPIO_PIN_SET); 
+    HAL_Delay(1); 
+    HAL_GPIO_WritePin(lcd->E_Port, lcd->E_PIN, GPIO_PIN_RESET); 
+    HAL_Delay(1); 
+}
+    
+
+void LCD_SendCmd_4bit(LCD1602_HandleTypeDef* lcd, uint8_t cmd) { 
+    HAL_GPIO_WritePin(lcd->RS_Port, lcd->RS_PIN, GPIO_PIN_RESET); 
+
+    LCD_Send4bit(lcd, (cmd >> 4) & 0x0F);
+    LCD_Send4bit(lcd, cmd & 0x0F);
+} 
+
+
+void LCD_SendData_4bit(LCD1602_HandleTypeDef* lcd, uint8_t data) { 
+    HAL_GPIO_WritePin(lcd->RS_Port, lcd->RS_PIN, GPIO_PIN_SET);
+
+    LCD_Send4bit(lcd, (data >> 4) & 0x0F); 
+    LCD_Send4bit(lcd, data & 0x0F);
+} 
+
+
+void LCD_Init_4bit(LCD1602_HandleTypeDef* lcd) { 
+    HAL_Delay(50);
+
+    LCD_Send4bit(lcd, 0x03); 
+    HAL_Delay(5); 
+    LCD_Send4bit(lcd, 0x03); 
+    HAL_Delay(5); 
+    LCD_Send4bit(lcd, 0x03); 
+    HAL_Delay(1); 
+    LCD_Send4bit(lcd, 0x02);
+
+    LCD_SendCmd_4bit(lcd, LCD_FUNCTION_SET_4BIT); 
+    LCD_SendCmd_4bit(lcd, LCD_DISPLAY_ON); 
+    LCD_SendCmd_4bit(lcd, LCD_CLEAR_DISPLAY); 
+    HAL_Delay(2);
+    LCD_SendCmd_4bit(lcd, LCD_ENTRY_MODE_SET); 
+}

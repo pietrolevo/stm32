@@ -98,13 +98,26 @@ int main(void)
 
   char msg[17];
 
+  /* // 8 bit version
   LCD1602_HandleTypeDef lcd = {
     .RS_Port = GPIOC,
     .RS_PIN = RS_Pin,
     .E_Port = GPIOC,
     .E_PIN = E_Pin,
     .Data_Port = {GPIOA, GPIOA, GPIOA, GPIOA, GPIOA, GPIOA, GPIOA, GPIOA},
-    .Data_Pin = {D0_Pin, D1_Pin, D2_Pin, D3_Pin, D4_Pin, D5_Pin, D6_Pin, D7_Pin}
+    .Data_Pin = {D0_Pin, D1_Pin, D2_Pin, D3_Pin, D4_Pin, D5_Pin, D6_Pin, D7_Pin},
+    .mode = LCD_MODE_8BIT
+  };
+  */
+
+  LCD1602_HandleTypeDef lcd = {
+    .RS_Port = GPIOC,
+    .RS_PIN = RS_Pin,
+    .E_Port = GPIOC,
+    .E_PIN = E_Pin,
+    .Data_Port = {GPIOA, GPIOA, GPIOA, GPIOA},
+    .Data_Pin = {D4_Pin, D5_Pin, D6_Pin, D7_Pin},
+    .mode = LCD_MODE_4BIT
   };
 
   LCD_Init(&lcd);
@@ -122,8 +135,14 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   static uint8_t last_pos = 255;
-  static uint16_t last_raw = 32000;  
+  static uint16_t last_raw = 32000; 
+  uint32_t now = 0, past = 0;
+  const uint32_t interval = 300; 
   while (1) {
+  now = uwTick;
+
+  if ((now - past >= interval)) {
+    past = now;
     uint8_t pos = rotaryRead();
     uint16_t raw = rotaryGetRawADC();
 
@@ -138,7 +157,8 @@ int main(void)
       sprintf(msg, "%-5hu", raw);
       LCD_Println(&lcd, 1, 10, msg);
     }
-    HAL_Delay(300);
+  }
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

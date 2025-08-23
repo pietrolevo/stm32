@@ -22,8 +22,14 @@
 #define LCD_RETURN_HOME          0x02  
 #define LCD_ENTRY_MODE_SET       0x06
 #define LCD_DISPLAY_ON           0x0C
+#define LCD_FUNCTION_SET_4BIT    0x28   
 #define LCD_FUNCTION_SET         0x38
 #define LCD_SET_DDRAM_ADDR       0x80
+
+typedef enum {
+    LCD_MODE_8BIT,
+    LCD_MODE_4BIT
+} LCD_Mode;
 
 
 typedef struct {
@@ -33,6 +39,7 @@ typedef struct {
     uint16_t E_PIN;
     GPIO_TypeDef* Data_Port[8];
     uint16_t Data_Pin[8];
+    LCD_Mode mode;
 } LCD1602_HandleTypeDef;
 
 
@@ -44,5 +51,10 @@ void LCD_SendData(LCD1602_HandleTypeDef* lcd, uint8_t data);
 void LCD_Printpg(LCD1602_HandleTypeDef* lcd, const char* str);
 void LCD_Println(LCD1602_HandleTypeDef* lcd, uint8_t row, uint8_t col, const char* str);
 void LCD_SetCursor(LCD1602_HandleTypeDef* lcd, uint8_t row, uint8_t col);
+
+void LCD_Send4bit(LCD1602_HandleTypeDef* lcd, uint8_t nibble);
+void LCD_SendCmd_4bit(LCD1602_HandleTypeDef* lcd, uint8_t cmd);
+void LCD_SendData_4bit(LCD1602_HandleTypeDef* lcd, uint8_t data);
+void LCD_Init_4bit(LCD1602_HandleTypeDef* lcd);
 
 #endif
