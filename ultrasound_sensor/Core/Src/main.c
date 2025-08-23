@@ -24,7 +24,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,7 +57,43 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+uint32_t IC_val1 = 0;
+uint32_t IC_val2 = 0;
+uint32_t diff = 0;
+uint8_t is_first_captured = 0;
+uint8_t distance = 0;
 
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
+  if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1) {
+    if (!is_first_captured) {
+      IC_val1 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
+      is_first_captured = 1;
+      __HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_1, TIM_INPUTCHANNELPOLARITY_FALLING);
+    } else if (is_first_captured) {
+      IC_val2 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
+      __HAL_TIM_SET_COUNTER(htim, 0);
+
+      if (IC_val2 > IC_val1) {
+        diff = IC_val2 - IC_val1;
+      } else {
+        diff = (0xffff - IC_val1) + IC_val2;
+      }
+
+      distance = diff *.034/2;
+      is_first_captured = 0;
+      __HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_1, TIM_INPUTCHANNELPOLARITY_RISING);
+      __HAL_TIM_DISABLE_IT(htim, TIM_IT_CC1);
+    }
+  }
+}
+
+
+void HCSR04_read(TIM_HandleTypeDef *htim) {
+  HAL_GPIO_WritePin(TRIG_GPIO_Port, TRIG_Pin, GPIO_PIN_SET);
+  HAL_Delay(10);
+  HAL_GPIO_WritePin(TRIG_GPIO_Port, TRIG_Pin, GPIO_PIN_RESET);
+  __HAL_TIM_ENABLE_IT(htim, TIM_IT_CC1);
+}
 /* USER CODE END 0 */
 
 /**
@@ -91,13 +128,18 @@ int main(void)
   MX_TIM1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  char msg[32];
   while (1)
   {
+    HCSR04_read(&htim1);
+    HAL_Delay(500);
+    sprintf(msg, "distance: %dcm\r\n", distance);
+    HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY); 
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
