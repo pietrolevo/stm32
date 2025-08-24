@@ -94,6 +94,21 @@ void HCSR04_read(TIM_HandleTypeDef *htim) {
   HAL_GPIO_WritePin(TRIG_GPIO_Port, TRIG_Pin, GPIO_PIN_RESET);
   __HAL_TIM_ENABLE_IT(htim, TIM_IT_CC1);
 }
+
+
+void beep(TIM_HandleTypeDef *htim, uint32_t channel, uint32_t freq, uint32_t duration) {
+  uint32_t timer_clock = HAL_RCC_GetPCLK2Freq();
+  uint32_t prescaler = htim->Instance->PSC + 1;
+  uint32_t period = (timer_clock / prescaler) / freq;
+
+  __HAL_TIM_SET_AUTORELOAD(htim, period - 1);
+  __HAL_TIM_SET_COMPARE(htim, channel, period / 2);
+
+  HAL_TIM_PWM_Start(htim, channel);
+  HAL_Delay(duration);
+  HAL_TIM_PWM_Stop(htim, channel);
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -127,19 +142,36 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM1_Init();
   MX_USART2_UART_Init();
+  MX_TIM8_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   char msg[32];
+  uint32_t now = 0, past = 0, interval = 300;
+  static uint32_t last_beep = 0;
   while (1)
   {
+    now = uwTick;
     HCSR04_read(&htim1);
-    HAL_Delay(500);
-    sprintf(msg, "distance: %dcm\r\n", distance);
-    HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY); 
+
+    if ((now - past) >= interval) {
+      past = now;
+      sprintf(msg, "distance: %dcm\r\n", distance);
+      HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY); 
+    }
+
+    uint32_t beep_interval = distance * 11 + 100;
+    if (beep_interval > 4500) beep_interval = 4500;
+    if (beep_interval < 100) beep_interval = 100;
+
+    if ((now - last_beep) >= beep_interval) {
+      last_beep = now;
+      beep(&htim8, TIM_CHANNEL_1, 1000, 50);
+    }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
